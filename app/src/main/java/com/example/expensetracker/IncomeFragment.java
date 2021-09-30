@@ -1,5 +1,6 @@
 package com.example.expensetracker;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.os.Bundle;
@@ -117,11 +118,6 @@ public class IncomeFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setHasFixedSize(true);
 
-        //Getting curremt user
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        FirebaseUser user = mAuth.getCurrentUser();
-        String uid = user.getUid();
-
         query = FirebaseDatabase.getInstance().getReference().child("IncomeDatabase").child(uid);
         FirebaseRecyclerOptions<Data> options = new FirebaseRecyclerOptions.Builder<Data>()
                 .setQuery(query, new SnapshotParser<Data>() {
@@ -148,7 +144,7 @@ public class IncomeFragment extends Fragment {
             }
 
             @Override
-            protected void onBindViewHolder(@NonNull @NotNull ViewHolder holder, int position, @NonNull @NotNull Data model) {
+            protected void onBindViewHolder(@NonNull @NotNull ViewHolder holder, @SuppressLint("RecyclerView") int position, @NonNull @NotNull Data model) {
                 holder.setAmount(String.valueOf(model.getAmount()));
                 holder.setDate(model.getDate());
                 holder.setNote(model.getNote());
@@ -202,7 +198,7 @@ public class IncomeFragment extends Fragment {
             public void onClick(View view) {
                 mType = mTypeEt.getText().toString().trim();
                 mNote = mNoteEt.getText().toString().trim();
-                mAmount = Integer.parseInt(mAmountEt.getText().toString().trim());
+                mAmount = Integer.valueOf(mAmountEt.getText().toString().length() != 0 ? mAmountEt.getText().toString() : "0");
 
                 if (TextUtils.isEmpty(mType)) {
                     mTypeEt.setError("Required field!!");
@@ -212,7 +208,7 @@ public class IncomeFragment extends Fragment {
                     mNoteEt.setError("Required field!!");
                     return;
                 }
-                if (TextUtils.isEmpty(String.valueOf(mAmount))) {
+                if (mAmountEt.getText().toString().length() == 0) {
                     mAmountEt.setError("Required field1!");
                     return;
                 }

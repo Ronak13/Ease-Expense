@@ -48,6 +48,16 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private ProgressDialog mDialog;
 
     @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            startActivity(new Intent(HomeActivity.this, MainActivity.class));
+            finish();
+        }
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
@@ -172,6 +182,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                     }
                 }
             });
+
         } else {
             mDialog.dismiss();
 
@@ -189,13 +200,4 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            startActivity(new Intent(HomeActivity.this, MainActivity.class));
-            finish();
-        }
-    }
 }

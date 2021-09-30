@@ -39,19 +39,19 @@ public class Registrationctivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registrationctivity);
 
+        mAuth = FirebaseAuth.getInstance();
+
         mDialog = new ProgressDialog(this);
 
-
-        mAuth = FirebaseAuth.getInstance();
+        mEmail = findViewById(R.id.registraction_email_et);
+        mPassword = findViewById(R.id.registraction_pass_et);
+        mSignin = findViewById(R.id.signin_tv);
+        mSignup = findViewById(R.id.signup_btn);
 
         registration();
     }
 
     private void registration() {
-        mEmail = findViewById(R.id.registraction_email_et);
-        mPassword = findViewById(R.id.registraction_pass_et);
-        mSignin = findViewById(R.id.signin_tv);
-        mSignup = findViewById(R.id.signup_btn);
 
         mSignup.setOnClickListener(new View.OnClickListener() {
             @Override

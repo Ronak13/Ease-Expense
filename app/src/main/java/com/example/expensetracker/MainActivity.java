@@ -1,5 +1,7 @@
 package com.example.expensetracker;
 
+import static android.content.ContentValues.TAG;
+
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -29,8 +31,6 @@ import com.google.firebase.auth.GoogleAuthProvider;
 
 import org.jetbrains.annotations.NotNull;
 
-import static android.content.ContentValues.TAG;
-
 public class MainActivity extends AppCompatActivity {
 
     private static final int RC_SIGN_IN = 11;
@@ -53,6 +53,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         acc = GoogleSignIn.getLastSignedInAccount(this);
         mAuth = FirebaseAuth.getInstance();
+
+        // to check if user has already login or not
         if (mAuth.getCurrentUser() != null && mAuth.getCurrentUser().isEmailVerified() && acc != null) {
             startActivity(new Intent(getApplicationContext(), HomeActivity.class));
         }
@@ -123,13 +125,13 @@ public class MainActivity extends AppCompatActivity {
                                 startActivity(new Intent(getApplicationContext(), HomeActivity.class));
                                 Toast.makeText(getApplicationContext(), "Login successful!!", Toast.LENGTH_SHORT).show();
                             } else {
-                                Toast.makeText(getApplicationContext(), "Please verify your before login!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getApplicationContext(), "Please verify your email before login!", Toast.LENGTH_SHORT).show();
                             }
 
                         } else {
                             mDialog.dismiss();
                             startActivity(new Intent(MainActivity.this, Registrationctivity.class));
-                            Toast.makeText(getApplicationContext(), "User is not registred please sign-up", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(), " either user is not registred or check your credentials", Toast.LENGTH_SHORT).show();
 
                         }
                     }
@@ -138,21 +140,13 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // FOr signup
-        mSignup.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent i = new Intent(MainActivity.this, Registrationctivity.class);
-                startActivity(i);
-            }
+        mSignup.setOnClickListener(view -> {
+            Intent i = new Intent(MainActivity.this, Registrationctivity.class);
+            startActivity(i);
         });
 
         // For forgot passowrd
-        mForgotPass.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(MainActivity.this, ForgotPasswordActivity.class));
-            }
-        });
+        mForgotPass.setOnClickListener(view -> startActivity(new Intent(MainActivity.this, ForgotPasswordActivity.class)));
     }
 
 

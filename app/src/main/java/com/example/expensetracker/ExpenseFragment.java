@@ -1,5 +1,6 @@
 package com.example.expensetracker;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -17,7 +18,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.expensetracker.Model.Data;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.firebase.ui.database.SnapshotParser;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -108,25 +108,18 @@ public class ExpenseFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
         recyclerView.setHasFixedSize(true);
 
-        //Getting current user
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        FirebaseUser user = mAuth.getCurrentUser();
-        String uid = user.getUid();
+//        //Getting current user
+//        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+//        FirebaseUser user = mAuth.getCurrentUser();
+//        String uid = user.getUid();
 
         query = FirebaseDatabase.getInstance().getReference().child("ExpenseDatabase").child(uid);
         FirebaseRecyclerOptions<Data> options = new FirebaseRecyclerOptions.Builder<Data>()
-                .setQuery(query, new SnapshotParser<Data>() {
-                    @NonNull
-                    @NotNull
-                    @Override
-                    public Data parseSnapshot(@NonNull @NotNull DataSnapshot snapshot) {
-                        return new Data(Integer.parseInt(snapshot.child("amount").getValue().toString()),
-                                snapshot.child("type").getValue().toString(),
-                                snapshot.child("note").getValue().toString(),
-                                snapshot.child("id").getValue().toString(),
-                                snapshot.child("date").getValue().toString());
-                    }
-                }).build();
+                .setQuery(query, snapshot -> new Data(Integer.parseInt(snapshot.child("amount").getValue().toString()),
+                        snapshot.child("type").getValue().toString(),
+                        snapshot.child("note").getValue().toString(),
+                        snapshot.child("id").getValue().toString(),
+                        snapshot.child("date").getValue().toString())).build();
         adapter = new FirebaseRecyclerAdapter<Data, ViewHolder2>(options) {
 
             @NonNull
@@ -139,7 +132,7 @@ public class ExpenseFragment extends Fragment {
             }
 
             @Override
-            protected void onBindViewHolder(@NonNull @NotNull ViewHolder2 holder, int position, @NonNull @NotNull Data model) {
+            protected void onBindViewHolder(@NonNull @NotNull ViewHolder2 holder, @SuppressLint("RecyclerView") int position, @NonNull @NotNull Data model) {
                 holder.setType(model.getType());
                 holder.setAmount(String.valueOf(model.getAmount()));
                 holder.setDate(model.getDate());
@@ -194,18 +187,21 @@ public class ExpenseFragment extends Fragment {
             public void onClick(View view) {
                 mNote = mNoteEt.getText().toString().trim();
                 mType = mTypeEt.getText().toString().trim();
-                mAmount = Integer.parseInt(mAmountEt.getText().toString().trim());
+                mAmount = Integer.valueOf(mAmountEt.getText().toString().length() != 0 ? mAmountEt.getText().toString() : "0");
 
                 if (TextUtils.isEmpty(mNote)) {
                     mNoteEt.setError("Required field!!");
+                    mNoteEt.requestFocus();
                     return;
                 }
                 if (TextUtils.isEmpty(mType)) {
                     mTypeEt.setError("Required field!!");
+                    mTypeEt.requestFocus();
                     return;
                 }
-                if (TextUtils.isEmpty(String.valueOf(mAmount))) {
+                if (mAmountEt.getText().toString().length() == 0) {
                     mAmountEt.setError("Required field!!");
+                    mAmountEt.requestFocus();
                     return;
                 }
                 String mDate = DateFormat.getDateInstance().format(new Date());

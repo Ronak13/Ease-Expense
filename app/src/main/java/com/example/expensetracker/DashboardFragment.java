@@ -69,7 +69,7 @@ public class DashboardFragment extends Fragment {
     private FirebaseRecyclerAdapter mExpenseAdapter;
     private String uid;
 
-    //Total epense and income textview
+    //Total expense and income textview
     private TextView mTotalIncome;
     private TextView mTotalExpense;
 
@@ -152,6 +152,7 @@ public class DashboardFragment extends Fragment {
             }
         });
 
+        // setting total income
         mIncomeDatabse.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
@@ -170,6 +171,7 @@ public class DashboardFragment extends Fragment {
             }
         });
 
+        // setting total Expense
         mExpenseDatabase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
@@ -188,19 +190,24 @@ public class DashboardFragment extends Fragment {
             }
         });
 
+        // setting Income recyclerview
         LinearLayoutManager layoutManagerIncome = new LinearLayoutManager(getActivity(), RecyclerView.HORIZONTAL, false);
         layoutManagerIncome.setStackFromEnd(true);
         layoutManagerIncome.setReverseLayout(true);
         mIncomeRecycler.setHasFixedSize(true);
         mIncomeRecycler.setLayoutManager(layoutManagerIncome);
 
+        //setting Expense recyclerview
         LinearLayoutManager layoutManagerExpense = new LinearLayoutManager(getActivity(), RecyclerView.HORIZONTAL, false);
         layoutManagerExpense.setStackFromEnd(true);
         layoutManagerExpense.setReverseLayout(true);
         mExpenseRecycler.setHasFixedSize(true);
         mExpenseRecycler.setLayoutManager(layoutManagerExpense);
+
+        // fetching Income and Expense Data
         fetchIncomeData();
         fetchExpenseData();
+
         return view;
 
     }
@@ -240,7 +247,6 @@ public class DashboardFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 incomeDataInsert();
-
             }
         });
 
@@ -253,6 +259,15 @@ public class DashboardFragment extends Fragment {
     }
 
     public void incomeDataInsert() {
+        insertData(mIncomeDatabse);
+    }
+
+    public void expenseDataInsert() {
+        insertData(mExpenseDatabase);
+    }
+
+    public void insertData(DatabaseReference ref) {
+
         AlertDialog.Builder mydialog = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         View v = inflater.inflate(R.layout.custom_layout_for_intersting_data, null);
@@ -271,7 +286,6 @@ public class DashboardFragment extends Fragment {
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 String amount = etAmount.getText().toString().trim();
                 String note = etNote.getText().toString().trim();
                 String type = etType.getText().toString().trim();
@@ -290,11 +304,11 @@ public class DashboardFragment extends Fragment {
                 }
                 int intAmount = Integer.parseInt(amount);
 
-                String id = mIncomeDatabse.push().getKey();
+                String id = ref.push().getKey();
                 String mDate = DateFormat.getDateInstance().format(new Date());
 
                 Data data = new Data(intAmount, type, note, id, mDate);
-                mIncomeDatabse.child(id).setValue(data);
+                ref.child(id).setValue(data);
                 Toast.makeText(getActivity(), "Data Added!!", Toast.LENGTH_SHORT).show();
                 ftAnimation();
                 dialog.dismiss();
@@ -308,69 +322,11 @@ public class DashboardFragment extends Fragment {
             }
         });
         dialog.show();
-    }
 
-    public void expenseDataInsert() {
-        AlertDialog.Builder mydialog = new AlertDialog.Builder(getActivity());
-        LayoutInflater inflater = LayoutInflater.from(getActivity());
-        View v = inflater.inflate(R.layout.custom_layout_for_intersting_data, null);
-        mydialog.setView(v);
-
-        AlertDialog dialog = mydialog.create();
-        dialog.setCancelable(false);
-
-
-        EditText etAmount = v.findViewById(R.id.amount_et);
-        EditText etType = v.findViewById(R.id.type_et);
-        EditText etNote = v.findViewById(R.id.note_et);
-
-
-        android.widget.Button btnSave = v.findViewById(R.id.save_btn);
-        android.widget.Button btncancel = v.findViewById(R.id.cancel_btn);
-
-
-        btnSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String amount = etAmount.getText().toString().trim();
-                String type = etType.getText().toString().trim();
-                String note = etNote.getText().toString().trim();
-
-                if (TextUtils.isEmpty(amount)) {
-                    etAmount.setError("Required field!!");
-                    return;
-                }
-                if (TextUtils.isEmpty(type)) {
-                    etAmount.setError("Required field!!");
-                    return;
-                }
-                if (TextUtils.isEmpty(note)) {
-                    etAmount.setError("Required field!!");
-                    return;
-                }
-                int intAmount = Integer.parseInt(amount);
-
-                String id = mExpenseDatabase.push().getKey();
-                String mDate = DateFormat.getDateInstance().format(new Date());
-                Data data = new Data(intAmount, type, note, id, mDate);
-                mExpenseDatabase.child(id).setValue(data);
-                Toast.makeText(getActivity(), "Data added!!", Toast.LENGTH_SHORT).show();
-                ftAnimation();
-                dialog.dismiss();
-            }
-        });
-
-        btncancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ftAnimation();
-                dialog.dismiss();
-            }
-        });
-        dialog.show();
     }
 
     private void fetchIncomeData() {
+
         incomeQuery = FirebaseDatabase.getInstance().getReference().child("IncomeDatabase").child(uid);
         FirebaseRecyclerOptions<Data> options = new FirebaseRecyclerOptions.Builder<Data>()
                 .setQuery(incomeQuery, new SnapshotParser<Data>() {
@@ -413,10 +369,10 @@ public class DashboardFragment extends Fragment {
         };
         mIncomeRecycler.setAdapter(mIncomeAdapter);
         mIncomeAdapter.startListening();
-
     }
 
     private void fetchExpenseData() {
+
         expenseQuery = FirebaseDatabase.getInstance().getReference().child("ExpenseDatabase").child(uid);
         FirebaseRecyclerOptions<Data> options = new FirebaseRecyclerOptions.Builder<Data>()
                 .setQuery(expenseQuery, new SnapshotParser<Data>() {
@@ -460,4 +416,5 @@ public class DashboardFragment extends Fragment {
         mExpenseRecycler.setAdapter(mExpenseAdapter);
         mExpenseAdapter.startListening();
     }
+
 }
